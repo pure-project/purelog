@@ -2,7 +2,7 @@
 
 **A pure logging library for go, simple & fast.**
 
-
+[中文](doc/README_cn.md)
 
 
 
