@@ -50,6 +50,17 @@ purelog.DefaultConfig.SetFile("test.log")
 purelog.Flush()
 ```
 
+输出：
+
+```
+//格式: 日期 时间.微秒 PID 文件:行号 等级 | 数据\n
+2022-09-12 23:49:51.542323 16180 purelog_demo/main.go:10 DBG | debug message.
+2022-09-12 23:49:51.553323 16180 purelog_demo/main.go:11 INF | info message.
+2022-09-12 23:49:51.553323 16180 purelog_demo/main.go:12 WAR | warn message.
+2022-09-12 23:49:51.553323 16180 purelog_demo/main.go:13 ERR | error message.
+...
+```
+
 
 
 推荐用法：
