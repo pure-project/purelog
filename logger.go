@@ -46,54 +46,46 @@ func (l *Logger) Flush() {
 }
 
 func (l *Logger) Debug(args ...interface{}) {
-	if l.enabled(LevelDebug) {
-		//now := time.Now()    //do not early for sequent time line.
-		l.log(LevelDebug, 2, "", args...)
-	}
+	l.log(LevelDebug, 1, "", args...)
 }
 
 func (l *Logger) Info(args ...interface{}) {
-	if l.enabled(LevelInfo) {
-		l.log(LevelInfo, 2, "", args...)
-	}
+	l.log(LevelInfo, 1, "", args...)
 }
 
 func (l *Logger) Warn(args ...interface{}) {
-	if l.enabled(LevelWarn) {
-		l.log(LevelWarn, 2, "", args...)
-	}
+	l.log(LevelWarn, 1, "", args...)
 }
 
 func (l *Logger) Error(args ...interface{}) {
-	if l.enabled(LevelError) {
-		l.log(LevelError, 2, "", args...)
-	}
+	l.log(LevelError, 1, "", args...)
 }
 
 func (l *Logger) Debugf(format string, args ...interface{}) {
-	if l.enabled(LevelDebug) {
-		l.log(LevelDebug, 2, format, args...)
-	}
+	l.log(LevelDebug, 1, format, args...)
 }
 
 func (l *Logger) Infof(format string, args ...interface{}) {
-	if l.enabled(LevelInfo) {
-		l.log(LevelInfo, 2, format, args...)
-	}
+	l.log(LevelInfo, 1, format, args...)
 }
 
 func (l *Logger) Warnf(format string, args ...interface{}) {
-	if l.enabled(LevelWarn) {
-		l.log(LevelWarn, 2, format, args...)
-	}
+	l.log(LevelWarn, 1, format, args...)
 }
 
 func (l *Logger) Errorf(format string, args ...interface{}) {
-	if l.enabled(LevelError) {
-		l.log(LevelError, 2, format, args...)
-	}
+	l.log(LevelError, 1, format, args...)
 }
 
+func (l *Logger) Log(level Level, skip int, args ...interface{}) {
+	skip++
+	l.log(level, skip, "", args...)
+}
+
+func (l *Logger) Logf(level Level, skip int, format string, args ...interface{}) {
+	skip++
+	l.log(level, skip, format, args...)
+}
 
 
 const (
@@ -119,8 +111,14 @@ func (l *Logger) enabled(level Level) bool {
 }
 
 func (l *Logger) log(level Level, skip int, format string, args ...interface{}) {
+	if !l.enabled(level) {
+		return
+	}
+
+	skip++
 	file, line := l.caller(skip)
 	_, file = reverseSplitN(file, 2, '/')
+
 	levelStr := level.shortString()
 
 	if len(args) == 0 {
