@@ -321,6 +321,8 @@ func (l *Logger) caller(skip int) (string, int) {
 
 func (l *Logger) internalError(format string, args ...interface{}) {
 	if l.config.getStderr() {
+		defer os.Stderr.WriteString("\n")
+
 		if len(args) == 0 {
 			os.Stderr.WriteString(format)
 			return
@@ -328,6 +330,7 @@ func (l *Logger) internalError(format string, args ...interface{}) {
 
 		if len(format) == 0 {
 			fmt.Fprint(os.Stderr, args...)
+
 			return
 		}
 
