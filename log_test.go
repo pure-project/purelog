@@ -267,6 +267,14 @@ func TestFlush(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
+func TestNewDir(t *testing.T) {
+	logger := New(NewConfig().
+		SetFile("log/to/dir/test.log").
+		SetStderr(true))
+	defer logger.Close()
+
+	logger.Infof("test dir")
+}
 
 //benchmarks:
 
@@ -342,6 +350,18 @@ func BenchmarkSlow(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		logger.Infof("test %+v", st)
 	}
+}
+
+func BenchmarkMulti(b *testing.B) {
+	big := b2s(make([]byte, 4096))
+	logger := New(NewConfig().SetFile("test.log").SetFlush(500 * time.Millisecond))
+	defer logger.Close()
+
+	b.RunParallel(func(pb *testing.PB) {
+		for pb.Next() {
+			logger.Infof(big)
+		}
+	})
 }
 
 
