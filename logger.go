@@ -220,7 +220,7 @@ func (l *Logger) flush() {
 //sync write data to file
 func (l *Logger) sync(file string, data []byte) {
 	dir, _ := reverseSplitN(file, 1, '/')
-	_ = os.MkdirAll(dir, 0666)
+	_ = os.MkdirAll(dir, os.ModePerm)
 
 	out, err := os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_WRONLY | os.O_SYNC, 0666)
 	if err != nil {
