@@ -25,10 +25,10 @@ type Logger struct {
 }
 
 //new logger instance
-func New(config *Config) *Logger {
-	 l := &Logger{}
-	 l.init(config)
-	 return l
+func New(config ...*Config) (l *Logger) {
+	 l = new(Logger)
+	 l.init(config...)
+	 return
 }
 
 //close logger
@@ -95,8 +95,13 @@ const (
 	fileBufSizeMax = 4 * 1024 * 1024       //file buffer max size:  4MB (for double-buffer)
 )
 
-func (l *Logger) init(config *Config) {
-	l.config  = config
+func (l *Logger) init(config ...*Config) {
+	if len(config) != 0 {
+		l.config = config[0]
+	} else {
+		l.config = NewConfig().SetStderr(true).SetStdout(true).SetCaller(true)
+	}
+
 	l.pid     = os.Getpid()
 	l.bp.New  = func() interface{} { return &buffer{ Data: make([]byte, 0, lineBufSize) } }
 	l.buf     = &buffer{ Data: make([]byte, 0, fileBufSizeMin) }
