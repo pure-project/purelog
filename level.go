@@ -38,7 +38,7 @@ func (level Level) String() string {
 	}
 }
 
-func (level Level) shortString() string {
+func (level Level) ShortString() string {
 	switch level {
 	case LevelDebug:
 		return "DBG"

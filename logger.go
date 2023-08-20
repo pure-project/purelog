@@ -119,7 +119,7 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 	file, line := l.caller(skip)
 	_, file = reverseSplitN(file, 2, '/')
 
-	levelStr := level.shortString()
+	levelStr := level.ShortString()
 
 	if len(args) == 0 {
 		l.mtx.Lock()
