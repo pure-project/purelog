@@ -203,7 +203,8 @@ func reverseSplitN(s string, n int, c byte) (string, string) {
 
 //fast []byte to string
 func b2s(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	return *(*string)(unsafe.Pointer(&reflect.StringHeader{Data: hdr.Data, Len: hdr.Len}))
 }
 
 //fast string to []byte
