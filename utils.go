@@ -190,9 +190,6 @@ func reverseIndexB(b []byte, n int, c byte) int {
 
 
 //reverse split string
-//
-//reverseSplitN("a/b/c", 1) => a/b, c
-//reverseSplitN("a/b/c", 2) => a, b/c
 func reverseSplitN(s string, n int, c byte) (string, string) {
 	i := reverseIndex(s, n, c)
 	if i != -1 {
