@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"sync"
 	"time"
+
+	"github.com/pure-project/purebuf"
 )
 
 //logger instance
@@ -15,8 +17,8 @@ type Logger struct {
 	mtx     sync.Mutex
 	wg      sync.WaitGroup
 	bp      sync.Pool
-	buf     *buffer
-	buf2    *buffer
+	buf     *purebuf.Buffer
+	buf2    *purebuf.Buffer
 	files   []string
 	flushCh chan bool
 	once    sync.Once
@@ -100,9 +102,9 @@ func (l *Logger) init(config ...*Config) {
 	}
 
 	l.pid = os.Getpid()
-	l.bp.New = func() interface{} { return &buffer{Data: make([]byte, 0, lineBufSize)} }
-	l.buf  = &buffer{Data: make([]byte, 0, fileBufSizeMin)}
-	l.buf2 = &buffer{Data: make([]byte, 0, fileBufSizeMin)}
+	l.bp.New = func() interface{} { return &purebuf.Buffer{Data: make([]byte, 0, lineBufSize)} }
+	l.buf  = &purebuf.Buffer{Data: make([]byte, 0, fileBufSizeMin)}
+	l.buf2 = &purebuf.Buffer{Data: make([]byte, 0, fileBufSizeMin)}
 	l.flushCh = make(chan bool, 1)
 	l.wg.Add(1)
 	go l.doLog()
@@ -122,7 +124,7 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 	_, file = reverseSplitN(file, 2, '/')
 
 	if formatter := l.config.getFormatter(); formatter != nil {
-		buf := l.bp.Get().(*buffer)
+		buf := l.bp.Get().(*purebuf.Buffer)
 		defer l.bp.Put(buf)
 		buf.Data = formatter(buf.Data[:0], level, file, line, format, args...)
 
@@ -156,7 +158,7 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 		}
 	}
 
-	buf := l.bp.Get().(*buffer)
+	buf := l.bp.Get().(*purebuf.Buffer)
 	defer l.bp.Put(buf)
 
 	buf.Reset()

@@ -7,39 +7,6 @@ import (
 	"unsafe"
 )
 
-//lite byte buffer
-type buffer struct {
-	Data []byte
-}
-
-func (buf *buffer) Len() int {
-	return len(buf.Data)
-}
-
-func (buf *buffer) Cap() int {
-	return cap(buf.Data)
-}
-
-func (buf *buffer) Write(b []byte) (int, error) {
-	buf.Data = append(buf.Data, b...)
-	return len(b), nil
-}
-
-func (buf *buffer) WriteString(s string) (int, error) {
-	buf.Data = append(buf.Data, s...)
-	return len(s), nil
-}
-
-func (buf *buffer) WriteByte(b byte) error {
-	buf.Data = append(buf.Data, b)
-	return nil
-}
-
-func (buf *buffer) Reset() {
-	buf.Data = buf.Data[:0]
-}
-
-
 //1949-10-01 07:00:00.000000 pid level file line |
 func appendHeader(buf []byte, now time.Time, pid int, file string, line int, level string) []byte {
 	buf = appendTimestamp(buf, now)
