@@ -2,6 +2,7 @@ package purelog
 
 import (
 	"fmt"
+	"github.com/pure-project/purebuf"
 	"log"
 	"os"
 	"strconv"
@@ -278,11 +279,11 @@ func TestNewDir(t *testing.T) {
 }
 
 func TestCustomFormat(t *testing.T) {
-	DefaultConfig.SetFormatter(func(buf []byte, level Level, file string, line int, format string, args ...interface{}) []byte {
+	DefaultConfig.SetFormatter(func(buf *purebuf.Buffer, level Level, file string, line int, format string, args ...interface{}) {
 		if len(format) != 0 {
-			return append(buf, fmt.Sprintf("%s|%s|%s:%d|<%s> \n", time.Now().Format(time.RFC3339), level.String(), file, line, fmt.Sprintf(format, args...))...)
+			fmt.Fprintf(buf, "%s|%s|%s:%d|<%s> \n", time.Now().Format(time.RFC3339), level.String(), file, line, fmt.Sprintf(format, args...))
 		} else {
-			return append(buf, fmt.Sprintf("%s|%s|%s:%d|<%s> \n", time.Now().Format(time.RFC3339), level.String(), file, line, fmt.Sprint(args...))...)
+			fmt.Fprintf(buf, fmt.Sprintf("%s|%s|%s:%d|<%s> \n", time.Now().Format(time.RFC3339), level.String(), file, line, fmt.Sprint(args...)))
 		}
 	}).SetLevel(LevelDebug)
 	defer DefaultLogger.Close()

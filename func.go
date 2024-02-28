@@ -1,7 +1,11 @@
 package purelog
 
+import "github.com/pure-project/purebuf"
+
 //custom format function
-type FormatFunc func(buf []byte, level Level, file string, line int, format string, args ...interface{}) []byte
+//
+//format maybe empty(etc. Info)
+type FormatFunc func(buf *purebuf.Buffer, level Level, file string, line int, format string, args ...interface{})
 
 //custom flush function
 //

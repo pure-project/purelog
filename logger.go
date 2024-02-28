@@ -126,7 +126,9 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 	if formatter := l.config.getFormatter(); formatter != nil {
 		buf := l.bp.Get().(*purebuf.Buffer)
 		defer l.bp.Put(buf)
-		buf.Data = formatter(buf.Data[:0], level, file, line, format, args...)
+
+		buf.Reset()
+		formatter(buf, level, file, line, format, args...)
 
 		l.mtx.Lock()
 		defer l.mtx.Unlock()
