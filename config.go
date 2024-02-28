@@ -6,14 +6,16 @@ import (
 )
 
 type Config struct {
-	file   atomic.Value
-	size   uint64
-	flush  uint64
-	level  uint32
-	stderr uint32
-	stdout uint32
-	count  uint32
-	caller uint32
+	file      atomic.Value
+	formatter atomic.Value
+	flusher   atomic.Value
+	size      uint64
+	flush     uint64
+	level     uint32
+	stderr    uint32
+	stdout    uint32
+	count     uint32
+	caller    uint32
 }
 
 func NewConfig() *Config {
@@ -62,7 +64,15 @@ func (c *Config) SetFlush(flush time.Duration) *Config {
 	return c
 }
 
+func (c *Config) SetFormatter(formatter FormatFunc) *Config {
+	c.formatter.Store(formatter)
+	return c
+}
 
+func (c *Config) SetFlusher(flusher FlushFunc) *Config {
+	c.flusher.Store(flusher)
+	return c
+}
 
 func (c *Config) getFile() string {
 	iFile := c.file.Load()
@@ -99,6 +109,22 @@ func (c *Config) getCaller() bool {
 
 func (c *Config) getFlush() time.Duration {
 	return time.Duration(atomic.LoadUint64(&c.flush))
+}
+
+func (c *Config) getFormatter() FormatFunc {
+	iFormatter := c.formatter.Load()
+	if iFormatter != nil {
+		return iFormatter.(FormatFunc)
+	}
+	return nil
+}
+
+func (c *Config) getFlusher() FlushFunc {
+	iFlusher := c.flusher.Load()
+	if iFlusher != nil {
+		return iFlusher.(FlushFunc)
+	}
+	return nil
 }
 
 

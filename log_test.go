@@ -1,6 +1,7 @@
 package purelog
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -274,6 +275,32 @@ func TestNewDir(t *testing.T) {
 	defer logger.Close()
 
 	logger.Infof("test dir")
+}
+
+func TestCustomFormat(t *testing.T) {
+	DefaultConfig.SetFormatter(func(buf []byte, level Level, file string, line int, format string, args ...interface{}) []byte {
+		if len(format) != 0 {
+			return append(buf, fmt.Sprintf("%s|%s|%s:%d|<%s> \n", time.Now().Format(time.RFC3339), level.String(), file, line, fmt.Sprintf(format, args...))...)
+		} else {
+			return append(buf, fmt.Sprintf("%s|%s|%s:%d|<%s> \n", time.Now().Format(time.RFC3339), level.String(), file, line, fmt.Sprint(args...))...)
+		}
+	}).SetLevel(LevelDebug)
+	defer DefaultLogger.Close()
+
+	Info("test message")
+}
+
+func TestCustomFlush(t *testing.T) {
+	DefaultConfig.SetFlusher(func(data []byte) bool {
+		os.Stderr.WriteString("custom flush begin: \n")
+		os.Stderr.Write(data)
+		os.Stderr.WriteString("custom flush end. \n")
+		return false
+	}).SetLevel(LevelDebug)
+	defer DefaultLogger.Close()
+
+	Info("hello")
+	Info("world")
 }
 
 //benchmarks:

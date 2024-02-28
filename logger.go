@@ -121,6 +121,18 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 	file, line := l.caller(skip)
 	_, file = reverseSplitN(file, 2, '/')
 
+	if formatter := l.config.getFormatter(); formatter != nil {
+		buf := l.bp.Get().(*buffer)
+		defer l.bp.Put(buf)
+		buf.Data = formatter(buf.Data[:0], level, file, line, format, args...)
+
+		l.mtx.Lock()
+		defer l.mtx.Unlock()
+		l.buf.Data = append(l.buf.Data, buf.Data...)
+
+		return
+	}
+
 	levelStr := level.ShortString()
 
 	if len(args) == 0 {
@@ -190,6 +202,12 @@ func (l *Logger) flush() {
 	l.mtx.Lock()
 	l.buf, l.buf2 = l.buf2, l.buf
 	l.mtx.Unlock()
+
+	if flusher := l.config.getFlusher(); flusher != nil {
+		if flusher(l.buf2.Data) == false {
+			return
+		}
+	}
 
 	bufSize := l.buf2.Len()
 	defer l.recycleMemory(bufSize, l.buf2.Cap())
