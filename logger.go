@@ -270,7 +270,7 @@ func (l *Logger) rotate(size uint64, file string, data []byte) []byte {
 			//adjust line
 			idx := reverseIndexB(data[:sz], 1, '\n')
 			if idx != -1 {
-				l.sync(file, data[:idx])
+				l.sync(file, data[:idx+1])
 				data = data[idx+1:]
 			} else {
 				//adjust fail, direct cut
