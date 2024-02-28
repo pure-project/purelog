@@ -40,17 +40,17 @@ func (buf *buffer) Reset() {
 }
 
 
-//1949-10-01 07:00:00.000000 pid file line level |
+//1949-10-01 07:00:00.000000 pid level file line |
 func appendHeader(buf []byte, now time.Time, pid int, file string, line int, level string) []byte {
 	buf = appendTimestamp(buf, now)
 	buf = append(buf, ' ')
 	buf = appendInt(buf, pid)
 	buf = append(buf, ' ')
+	buf = append(buf, level...)
+	buf = append(buf, ' ')
 	buf = append(buf, file...)
 	buf = append(buf, ':')
 	buf = appendInt(buf, line)
-	buf = append(buf, ' ')
-	buf = append(buf, level...)
 	return append(buf, " | "...)
 }
 
