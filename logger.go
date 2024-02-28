@@ -10,23 +10,23 @@ import (
 
 //logger instance
 type Logger struct {
-	config   *Config
-	pid      int
-	mtx      sync.Mutex
-	wg       sync.WaitGroup
-	bp       sync.Pool
-	buf      *buffer
-	buf2     *buffer
-	files    []string
-	flushCh  chan bool
-	once     sync.Once
+	config  *Config
+	pid     int
+	mtx     sync.Mutex
+	wg      sync.WaitGroup
+	bp      sync.Pool
+	buf     *buffer
+	buf2    *buffer
+	files   []string
+	flushCh chan bool
+	once    sync.Once
 }
 
 //new logger instance
 func New(config ...*Config) (l *Logger) {
-	 l = new(Logger)
-	 l.init(config...)
-	 return
+	l = new(Logger)
+	l.init(config...)
+	return
 }
 
 //close logger
@@ -85,7 +85,6 @@ func (l *Logger) Logf(level Level, skip int, format string, args ...interface{})
 	l.log(level, skip, format, args...)
 }
 
-
 const (
 	flushTimeMin   = 50 * time.Millisecond //minimum flush time: 50ms
 	lineBufSize    = 1024                  //line buffer size: 1KB (for pool)
@@ -100,10 +99,10 @@ func (l *Logger) init(config ...*Config) {
 		l.config = NewConfig().SetStderr(true).SetStdout(true).SetCaller(true)
 	}
 
-	l.pid     = os.Getpid()
-	l.bp.New  = func() interface{} { return &buffer{ Data: make([]byte, 0, lineBufSize) } }
-	l.buf     = &buffer{ Data: make([]byte, 0, fileBufSizeMin) }
-	l.buf2    = &buffer{ Data: make([]byte, 0, fileBufSizeMin) }
+	l.pid = os.Getpid()
+	l.bp.New = func() interface{} { return &buffer{Data: make([]byte, 0, lineBufSize)} }
+	l.buf  = &buffer{Data: make([]byte, 0, fileBufSizeMin)}
+	l.buf2 = &buffer{Data: make([]byte, 0, fileBufSizeMin)}
 	l.flushCh = make(chan bool, 1)
 	l.wg.Add(1)
 	go l.doLog()
@@ -127,9 +126,9 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 	if len(args) == 0 {
 		l.mtx.Lock()
 		defer l.mtx.Unlock()
-		l.buf.Data = appendHeader(l.buf.Data, time.Now(), l.pid, file, line, levelStr)  //for normal time line
+		l.buf.Data = appendHeader(l.buf.Data, time.Now(), l.pid, file, line, levelStr) //for normal time line
 		l.buf.Data = append(l.buf.Data, format...)
-		l.buf.Data = append(l.buf.Data, '\n')
+		l.buf.Data = append(l.buf.Data, endLine...)
 		return
 	}
 
@@ -140,7 +139,7 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 			defer l.mtx.Unlock()
 			l.buf.Data = appendHeader(l.buf.Data, time.Now(), l.pid, file, line, levelStr)
 			l.buf.Data = append(l.buf.Data, str...)
-			l.buf.Data = append(l.buf.Data, '\n')
+			l.buf.Data = append(l.buf.Data, endLine...)
 			return
 		}
 	}
@@ -155,7 +154,7 @@ func (l *Logger) log(level Level, skip int, format string, args ...interface{}) 
 		fmt.Fprintf(buf, format, args...)
 	}
 
-	buf.Data = append(buf.Data, '\n')
+	buf.Data = append(buf.Data, endLine...)
 
 	l.mtx.Lock()
 	defer l.mtx.Unlock()
@@ -225,7 +224,7 @@ func (l *Logger) sync(file string, data []byte) {
 	dir, _ := reverseSplitN(file, 1, '/')
 	_ = os.MkdirAll(dir, os.ModePerm)
 
-	out, err := os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_WRONLY | os.O_SYNC, 0666)
+	out, err := os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_WRONLY|os.O_SYNC, 0666)
 	if err != nil {
 		l.internalError("logger.sync: open log file %s err: %v", file, err)
 		return
@@ -243,7 +242,7 @@ func (l *Logger) sync(file string, data []byte) {
 func (l *Logger) rotate(size uint64, file string, data []byte) []byte {
 	for len(data) != 0 {
 		fileSz := fileSize(file)
-		if uint64(len(data)) + fileSz >= size {
+		if uint64(len(data))+fileSz >= size {
 			//can write size
 			sz := size - fileSz
 			//adjust line
